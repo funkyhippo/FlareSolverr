@@ -109,8 +109,10 @@ async function keepAlive() {
       process.exit(1);
     }
     console.log(`Successfully created session: ${session}`);
+  } else {
+    console.log("Session is valid.");
   }
-  warmCache();
+  await warmCache();
   setTimeout(keepAlive, 20000);
 }
 
@@ -158,10 +160,10 @@ process.on("uncaughtException", function (err) {
 validateEnvironmentVariables();
 
 testWebBrowserInstallation()
-  .then(() => {
+  .then(async () => {
     // Start server
+    await keepAlive();
     app.listen(serverPort, serverHost, () => {
-      keepAlive();
       log.info(`Listening on http://${serverHost}:${serverPort}`);
     });
   })
