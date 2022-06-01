@@ -59,6 +59,16 @@ export interface V1ResponseSessions extends V1ResponseBase {
   sessions: string[]
 }
 
+let isReady: boolean = false;
+
+export function getSessionReady() {
+  return isReady;
+}
+
+export function setSessionReady(status: boolean) {
+  isReady = status;
+}
+
 export const routes: V1Routes = {
   'sessions.create': async (params: V1RequestSession, response: V1ResponseSession): Promise<void> => {
     const options: SessionCreateOptions = {
@@ -161,6 +171,7 @@ export async function controllerV1(req: Request, res: Response): Promise<void> {
     // execute the command
     const route = routes[params.cmd]
     if (route) {
+      if (!getSessionReady()) throw Error("Session isn't ready for external traffic yet.");
       await route(params, response)
     } else {
       throw Error(`The command '${params.cmd}' is invalid.`)

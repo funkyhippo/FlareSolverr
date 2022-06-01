@@ -1,5 +1,6 @@
 import {
   routes,
+  setSessionReady,
   V1Request,
   V1ResponseSessions,
   V1ResponseSolution,
@@ -112,12 +113,13 @@ async function keepAlive() {
   } else {
     console.log("Session is valid.");
   }
-  await warmCache();
-  setTimeout(keepAlive, 20000);
+  setTimeout(warmCache, 0);
+  setTimeout(keepAlive, 40000);
 }
 
 async function warmCache() {
   for (const host of targetHosts.split(",")) {
+    console.log(`Warming cache of ${host}`);
     const r: (a: V1Request, b: any) => Promise<void> = routes["request.get"];
     const warmingResponse: V1ResponseSolution = {
       solution: undefined,
@@ -138,8 +140,12 @@ async function warmCache() {
     );
     if (warmingResponse.status !== "ok") {
       console.error(`Failed to warm cache for ${host}`);
+    } else {
+      console.log(`Warmed cache of ${host}`);
     }
   }
+  console.log("Cache warmed.");
+  setSessionReady(true);
 }
 
 // Init
