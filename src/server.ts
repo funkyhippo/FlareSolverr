@@ -83,7 +83,7 @@ async function keepAlive() {
   if (!response.sessions.includes(session)) {
     console.log(`Sessions list doesn't include target: ${session}`);
     let success: boolean = false;
-    for (let i = 0; i < 10 || !success; i++) {
+    for (let i = 0; i < 10 && !success; i++) {
       try {
         await routes["sessions.create"](
           {
