@@ -4,7 +4,6 @@
   "description": "Proxy server to bypass Cloudflare protection.",
   "scripts": {
     "start": "tsc && node ./dist/server.js",
-    "start:docker": "pm2-runtime start ecosystem.config.js --env production",
     "build": "tsc",
     "dev": "nodemon -e ts --exec ts-node src/server.ts",
     "package": "tsc && node build-binaries.js",
@@ -24,7 +23,6 @@
     "body-parser": "^1.20.0",
     "console-log-level": "^1.4.1",
     "express": "^4.17.3",
-    "pm2": "^5.2.0",
     "puppeteer": "^13.5.2",
     "uuid": "^8.3.2"
   },
