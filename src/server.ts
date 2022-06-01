@@ -8,8 +8,6 @@ import {
 import log from "./services/log";
 import { testWebBrowserInstallation } from "./services/sessions";
 
-const os = require("os");
-
 const app = require("./app");
 const version: string = "v" + require("../package.json").version;
 const serverPort: number = Number(process.env.PORT) || 8191;
@@ -65,10 +63,18 @@ function validateEnvironmentVariables() {
   // }
 }
 
+const os = require("os");
+const memoryDiffMBRestart = 800 * 1024 * 1024; // Tune this
+let memorySnapshot: number = undefined;
+
 function memWatchdog() {
   const freeMem = os.freemem();
-  const totalMem = os.totalmem();
-  console.log(`Memory usage: ${freeMem / totalMem * 100}%, free: ${freeMem / 1024 / 1024}MB, total: ${totalMem / 1024 / 1024}MB`);
+  console.log(`Snapshot: ${memorySnapshot / 1024 / 1024}MB, free memory: ${freeMem / 1024 / 1024}MB`);
+  if (memorySnapshot === undefined) {
+    memorySnapshot = freeMem;
+  } else if ((memorySnapshot - freeMem) > (memoryDiffMBRestart)) {
+    process.exit(1);
+  }
   setTimeout(memWatchdog, 5000);
 }
 
