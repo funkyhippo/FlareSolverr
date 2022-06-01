@@ -67,7 +67,7 @@ function validateEnvironmentVariables() {
 
 function memWatchdog() {
   const freeMem = os.freemem();
-  const totalMem = os.totalMem();
+  const totalMem = os.totalmem();
   console.log(`Memory usage: ${freeMem / totalMem * 100}%, free: ${freeMem / 1024 / 1024}MB, total: ${totalMem / 1024 / 1024}MB`);
   setTimeout(memWatchdog, 5000);
 }
