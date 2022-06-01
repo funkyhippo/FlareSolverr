@@ -8,6 +8,8 @@ import {
 import log from "./services/log";
 import { testWebBrowserInstallation } from "./services/sessions";
 
+const os = require("os");
+
 const app = require("./app");
 const version: string = "v" + require("../package.json").version;
 const serverPort: number = Number(process.env.PORT) || 8191;
@@ -61,6 +63,13 @@ function validateEnvironmentVariables() {
   //   log.error(`The environment variable 'CAPTCHA_SOLVER' is wrong. ${e.message}`);
   //   process.exit(1);
   // }
+}
+
+function memWatchdog() {
+  const freeMem = os.freemem();
+  const totalMem = os.totalMem();
+  console.log(`Memory usage: ${freeMem / totalMem * 100}%, free: ${freeMem / 1024 / 1024}MB, total: ${totalMem / 1024 / 1024}MB`);
+  setTimeout(memWatchdog, 5000);
 }
 
 async function keepAlive() {
@@ -169,6 +178,7 @@ testWebBrowserInstallation()
   .then(async () => {
     // Start server
     await keepAlive();
+    memWatchdog();
     app.listen(serverPort, serverHost, () => {
       log.info(`Listening on http://${serverHost}:${serverPort}`);
     });
