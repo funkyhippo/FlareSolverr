@@ -14,7 +14,7 @@ RUN apk update && \
 USER node
 RUN mkdir -p /home/node/flaresolverr
 WORKDIR /home/node/flaresolverr
-COPY --chown=node:node package.json package-lock.json tsconfig.json ./
+COPY --chown=node:node package.json package-lock.json tsconfig.json ecosystem.config.js ./
 COPY --chown=node:node src ./src/
 
 # Install package. Skip installing the browser, we will use the installed package.
@@ -28,7 +28,7 @@ RUN npm install && \
 
 EXPOSE 8191
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["node", "./dist/server.js"]
+CMD ["npm", "run", "start:docker"]
 
 # docker build -t flaresolverr:custom .
 # docker run -p 8191:8191 -e LOG_LEVEL=debug flaresolverr:custom
