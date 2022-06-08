@@ -4,6 +4,7 @@ import {Protocol} from "devtools-protocol";
 import log from '../services/log'
 import {browserRequest, ChallengeResolutionResultT, ChallengeResolutionT} from "../services/solver";
 import {SessionCreateOptions} from "../services/sessions";
+import { maxTimeout } from '../server';
 const sessions = require('../services/sessions')
 const version: string = 'v' + require('../../package.json').version
 
@@ -141,12 +142,6 @@ export const routes: V1Routes = {
   },
 }
 
-// Restart within 250 - 400 requests, generated at runtime. Hopefully this
-// should allow the watchdog to restart the dead processes and route to the
-// ones that are still up.
-const requestMax = Math.floor(Math.random() * 200) + 500;
-let requestCount = 0;
-
 export async function controllerV1(req: Request, res: Response): Promise<void> {
   const response: V1ResponseBase = {
     status: null,
@@ -155,8 +150,6 @@ export async function controllerV1(req: Request, res: Response): Promise<void> {
     endTimestamp: 0,
     version: version
   }
-
-  requestCount++;
 
   try {
     const params: V1RequestBase = req.body
@@ -173,7 +166,7 @@ export async function controllerV1(req: Request, res: Response): Promise<void> {
 
     // set default values
     if (!params.maxTimeout || params.maxTimeout < 1) {
-      params.maxTimeout = 60000;
+      params.maxTimeout = maxTimeout;
     }
 
     // execute the command
@@ -192,12 +185,13 @@ export async function controllerV1(req: Request, res: Response): Promise<void> {
   }
 
   response.endTimestamp = Date.now()
-  log.info(`Response in ${(response.endTimestamp - response.startTimestamp) / 1000} s`)
+  const responseTimeMs = response.endTimestamp - response.startTimestamp;
+  log.info(`Response in ${(responseTimeMs) / 1000} s`)
   res.send(response)
 
-  // Kill after we've hit our request max. It's possible an in-flight request
-  // dies because one was routed to this particular process but.. oh well
-  if (requestCount > requestMax) {
-    process.exit(0);
+  // Kill after it takes too long to respond
+  if (responseTimeMs >= maxTimeout) {
+    console.error("Took too long to respond, exiting.")
+    process.exit(1);
   }
 }

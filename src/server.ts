@@ -17,7 +17,7 @@ const serverHost: string = process.env.HOST || "0.0.0.0";
 const session: string = process.env.FLARESOLVERR_SESSION || "sess";
 const targetHosts: string = process.env.TARGET_HOSTS; // Should be comma-separated hosts list, no whitespace
 
-const maxTimeout: number = 120000;
+export const maxTimeout: number = 60000;
 
 function validateEnvironmentVariables() {
   // ip and port variables are validated by nodejs
@@ -127,34 +127,39 @@ async function keepAlive() {
 }
 
 async function warmCache() {
-  for (const host of targetHosts.split(",")) {
-    console.log(`Warming cache of ${host}`);
-    const r: (a: V1Request, b: any) => Promise<void> = routes["request.get"];
-    const warmingResponse: V1ResponseSolution = {
-      solution: undefined,
-      status: "",
-      message: "",
-      startTimestamp: 0,
-      endTimestamp: 0,
-      version: "",
-    };
-    await r(
-      {
-        cmd: "request.get",
-        session: session,
-        url: host,
-        maxTimeout: maxTimeout,
-      },
-      warmingResponse
-    );
-    if (warmingResponse.status !== "ok") {
-      console.error(`Failed to warm cache for ${host}`);
-    } else {
-      console.log(`Warmed cache of ${host}`);
+  try {
+    for (const host of targetHosts.split(",")) {
+      console.log(`Warming cache of ${host}`);
+      const r: (a: V1Request, b: any) => Promise<void> = routes["request.get"];
+      const warmingResponse: V1ResponseSolution = {
+        solution: undefined,
+        status: "",
+        message: "",
+        startTimestamp: 0,
+        endTimestamp: 0,
+        version: "",
+      };
+      await r(
+        {
+          cmd: "request.get",
+          session: session,
+          url: host,
+          maxTimeout: maxTimeout,
+        },
+        warmingResponse
+      );
+      if (warmingResponse.status !== "ok") {
+        console.error(`Failed to warm cache for ${host}`);
+      } else {
+        console.log(`Warmed cache of ${host}`);
+      }
     }
+    console.log("Cache warmed.");
+    setSessionReady(true);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
   }
-  console.log("Cache warmed.");
-  setSessionReady(true);
 }
 
 // Init
