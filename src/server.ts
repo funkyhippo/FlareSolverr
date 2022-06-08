@@ -69,7 +69,7 @@ function memWatchdog() {
   const freeMem = os.freemem();
   const totalMem = os.totalmem();
   console.log(`Memory usage: ${(1 - freeMem / totalMem) * 100}%, free: ${freeMem / 1024 / 1024}MB, total: ${totalMem / 1024 / 1024}MB`);
-  setTimeout(memWatchdog, 5000);
+  setTimeout(memWatchdog, 10000);
 }
 
 async function keepAlive() {
@@ -123,7 +123,7 @@ async function keepAlive() {
     console.log("Session is valid.");
   }
   setTimeout(warmCache, 0);
-  setTimeout(keepAlive, 40000);
+  setTimeout(keepAlive, 60000);
 }
 
 async function warmCache() {
