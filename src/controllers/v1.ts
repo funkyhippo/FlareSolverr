@@ -190,7 +190,7 @@ export async function controllerV1(req: Request, res: Response): Promise<void> {
   res.send(response)
 
   // Kill after it takes too long to respond
-  if (responseTimeMs >= maxTimeout) {
+  if (responseTimeMs >= 15000) {
     console.error("Took too long to respond, exiting.")
     process.exit(1);
   }
